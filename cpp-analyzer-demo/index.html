@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C++ 代码现代化重构工具 | Modern C++ Refactor</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <div class="header-inner">
+            <div class="logo">
+                <svg viewBox="0 0 40 40" fill="none" aria-hidden="true">
+                    <rect x="2" y="2" width="36" height="36" rx="8" stroke="currentColor" stroke-width="2.5"/>
+                    <text x="20" y="28" text-anchor="middle" font-size="18" font-weight="bold" fill="currentColor" font-family="monospace">C+</text>
+                </svg>
+                <h1>C++ 代码现代化重构工具</h1>
+            </div>
+            <p class="subtitle">基于 C++17 规范 &middot; 自动检测安全风险与技术债务 &middot; 一键智能重构</p>
+        </div>
+    </header>
+
+    <main>
+        <!-- Toolbar -->
+        <section class="toolbar">
+            <div class="toolbar-left">
+                <select id="example-select" title="加载示例代码">
+                    <option value="legacy-malloc">示例: 内存管理问题</option>
+                    <option value="legacy-loops">示例: 旧式循环与宏</option>
+                    <option value="legacy-full">示例: 综合遗留代码</option>
+                    <option value="legacy-io-normalize">示例: I/O与规范化问题</option>
+                    <option value="legacy-macro-string">示例: 宏与字符串函数</option>
+                    <option value="legacy-stl-algorithms">示例: STL算法现代化</option>
+                    <option value="legacy-stl-container">示例: 容器操作(push_back/find)</option>
+                    <option value="legacy-linkedlist">示例: 链表→std::list</option>
+                    <option value="blank">空白文件</option>
+                </select>
+            </div>
+            <div class="toolbar-right">
+                <button id="btn-analyze" class="btn btn-primary" title="分析并重构代码 (Ctrl+Enter)">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                  分析并重构
+                </button>
+                <button id="btn-clear" class="btn btn-ghost" title="清空代码">清空</button>
+            </div>
+        </section>
+
+        <!-- Editor -->
+        <section class="editor-container">
+            <div class="editor-panel">
+                <div class="panel-header">
+                    <span class="panel-title">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+                        原始代码
+                    </span>
+                    <span class="lang-badge">C++</span>
+                </div>
+                <div class="code-wrap">
+                    <div class="line-numbers" id="line-numbers-input"></div>
+                    <div class="highlight-layer" id="highlight-input"></div>
+                    <textarea id="code-input" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
+                </div>
+            </div>
+
+            <div class="editor-divider">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </div>
+
+            <div class="editor-panel">
+                <div class="panel-header">
+                    <span class="panel-title">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                        重构后代码
+                        <span class="refactor-badge" id="refactor-badge" style="display:none"></span>
+                    </span>
+                    <div class="panel-actions">
+                        <button class="icon-btn" id="btn-copy" title="复制代码" style="display:none">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                            复制
+                        </button>
+                        <button class="icon-btn" id="btn-download" title="下载文件" style="display:none">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                            下载
+                        </button>
+                    </div>
+                </div>
+                <div class="code-wrap">
+                    <div class="line-numbers" id="line-numbers-output"></div>
+                    <div class="highlight-layer output" id="highlight-output"></div>
+                    <div class="placeholder-msg" id="placeholder-output">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                        <p>点击"分析并重构"按钮开始</p>
+                        <p class="hint">或按 Ctrl + Enter</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Results -->
+        <section id="results-section" class="results-section" style="display:none">
+            <!-- Stats bar -->
+            <div class="stats-bar" id="stats-bar"></div>
+
+            <!-- Report -->
+            <div class="report-container">
+                <div class="score-card">
+                    <div class="score-ring" id="score-ring">
+                        <svg viewBox="0 0 120 120">
+                            <circle class="bg" cx="60" cy="60" r="52"/>
+                            <circle class="fg" id="score-circle" cx="60" cy="60" r="52"/>
+                        </svg>
+                        <div class="score-val" id="score-value">--</div>
+                        <div class="score-lbl">合规评分</div>
+                    </div>
+                </div>
+                <div class="issues-list" id="issues-list">
+                    <h3>检查报告详情</h3>
+                    <div id="issues-container"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>C++ 代码现代化重构工具 Demo &mdash; 基于 C++17 规范 &middot; 自动检测与智能重构</p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
